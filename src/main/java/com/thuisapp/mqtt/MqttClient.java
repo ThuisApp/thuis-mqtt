@@ -65,12 +65,12 @@ public class MqttClient implements MqttCallbackExtended {
 
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI) {
-		publish("", "connected", "1");
+		publish("", WILL_TOPIC, "1");
 	}
 
 	@Override
 	public void connectionLost(Throwable cause) {
-		publish("", "connected", "0");
+		publish("", WILL_TOPIC, "0");
 	}
 
 	@Override
