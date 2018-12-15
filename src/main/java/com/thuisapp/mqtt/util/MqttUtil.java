@@ -5,6 +5,8 @@ import org.eclipse.microprofile.config.Config;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriBuilder;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Stateless
 public class MqttUtil {
@@ -24,9 +26,34 @@ public class MqttUtil {
 	public String buildTopic(String subject, String topic) {
 		return new StringBuilder()
 				.append(config.getValue("mqtt.topic_prefix", String.class))
-				.append(subject)
+				.append(cleanSubject(subject))
 				.append(topic)
 				.toString();
 	}
 
+	public static String cleanSubject(String rawSubject) {
+		if (rawSubject == null) return null;
+
+		return lowercaseFirst(Arrays.stream(rawSubject.split("(_|\\W)+"))
+			.map(MqttUtil::uppercaseFirst)
+			.collect(Collectors.joining()));
+	}
+
+	private static String uppercaseFirst(String s) {
+		if (s == null) return null;
+		if (s.length() == 0) return s;
+		if (s.length() == 1) return s.toUpperCase();
+
+		return s.substring(0, 1).toUpperCase() +
+				s.substring(1);
+	}
+
+	private static String lowercaseFirst(String s) {
+		if (s == null) return null;
+		if (s.length() == 0) return s;
+		if (s.length() == 1) return s.toLowerCase();
+
+		return s.substring(0, 1).toLowerCase() +
+				s.substring(1);
+	}
 }
