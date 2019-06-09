@@ -12,10 +12,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.logging.Level;
@@ -27,14 +25,15 @@ public class MqttClient implements MqttCallbackExtended {
 	public static final String WILL_TOPIC = "connected";
 
 	@Inject
-	private MqttUtil mqttUtil;
+	MqttUtil mqttUtil;
 
 	@Inject
-	private Config config;
+	Config config;
 
 	private IMqttAsyncClient client;
 
-	public void init(@Observes @Initialized(ApplicationScoped.class) Object event) {
+	@PostConstruct
+	public void init() {
 		try {
 			client = new MqttAsyncClient(
 					mqttUtil.buildMqttUri(),
@@ -48,7 +47,7 @@ public class MqttClient implements MqttCallbackExtended {
 			client.setCallback(this);
 			client.connect(options).waitForCompletion();
 		} catch (MqttException e) {
-			log.log(Level.WARNING, "Could not connect to MQTT broker", e);
+			log.log(Level.WARNING, "Could not connect to MQTT broker on " + mqttUtil.buildMqttUri(), e);
 		}
 	}
 

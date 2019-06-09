@@ -2,17 +2,17 @@ package com.thuisapp.mqtt.util;
 
 import org.eclipse.microprofile.config.Config;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriBuilder;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-@Stateless
+@ApplicationScoped
 public class MqttUtil {
 
 	@Inject
-	private Config config;
+	Config config;
 
 	public String buildMqttUri() {
 		return UriBuilder.fromPath("")
