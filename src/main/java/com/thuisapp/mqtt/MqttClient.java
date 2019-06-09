@@ -2,7 +2,7 @@ package com.thuisapp.mqtt;
 
 import com.thuisapp.mqtt.util.MqttUtil;
 import lombok.extern.java.Log;
-import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -18,6 +18,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.logging.Level;
 
+import static java.util.Optional.ofNullable;
+
 @Log
 @Singleton
 public class MqttClient implements MqttCallbackExtended {
@@ -28,7 +30,16 @@ public class MqttClient implements MqttCallbackExtended {
 	MqttUtil mqttUtil;
 
 	@Inject
-	Config config;
+	@ConfigProperty(name = "mqtt.client_id")
+	String mqttClientId;
+
+	@Inject
+	@ConfigProperty(name = "mqtt.username")
+	String mqttUsername;
+
+	@Inject
+	@ConfigProperty(name = "mqtt.password")
+	String mqttPassword;
 
 	private IMqttAsyncClient client;
 
@@ -37,12 +48,12 @@ public class MqttClient implements MqttCallbackExtended {
 		try {
 			client = new MqttAsyncClient(
 					mqttUtil.buildMqttUri(),
-					config.getValue("mqtt.client_id", String.class),
+					mqttClientId,
 					new MemoryPersistence()
 			);
 			MqttConnectOptions options = new MqttConnectOptions();
-			config.getOptionalValue("mqtt.username", String.class).ifPresent(options::setUserName);
-			config.getOptionalValue("mqtt.password", String.class).map(String::toCharArray).ifPresent(options::setPassword);
+			ofNullable(mqttUsername).ifPresent(options::setUserName);
+			ofNullable(mqttPassword).map(String::toCharArray).ifPresent(options::setPassword);
 			options.setWill(WILL_TOPIC, "0".getBytes(), 2, true);
 			client.setCallback(this);
 			client.connect(options).waitForCompletion();

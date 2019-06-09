@@ -1,6 +1,6 @@
 package com.thuisapp.mqtt.util;
 
-import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -12,20 +12,33 @@ import java.util.stream.Collectors;
 public class MqttUtil {
 
 	@Inject
-	Config config;
+	@ConfigProperty(name = "mqtt.scheme")
+	String mqttScheme;
+
+	@Inject
+	@ConfigProperty(name = "mqtt.host")
+	String mqttHost;
+
+	@Inject
+	@ConfigProperty(name = "mqtt.port")
+	int mqttPort;
+
+	@Inject
+	@ConfigProperty(name = "mqtt.topic_prefix")
+	String mqttTopicPrefix;
 
 	public String buildMqttUri() {
 		return UriBuilder.fromPath("")
-				.scheme(config.getValue("mqtt.scheme", String.class))
-				.host(config.getValue("mqtt.host", String.class))
-				.port(config.getValue("mqtt.port", Integer.class))
+				.scheme(mqttScheme)
+				.host(mqttHost)
+				.port(mqttPort)
 				.build()
 				.toString();
 	}
 
 	public String buildTopic(String subject, String topic) {
 		return new StringBuilder()
-				.append(config.getValue("mqtt.topic_prefix", String.class))
+				.append(mqttTopicPrefix)
 				.append(cleanSubject(subject))
 				.append(topic)
 				.toString();
