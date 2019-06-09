@@ -16,9 +16,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Optional;
 import java.util.logging.Level;
-
-import static java.util.Optional.ofNullable;
 
 @Log
 @Singleton
@@ -35,11 +34,11 @@ public class MqttClient implements MqttCallbackExtended {
 
 	@Inject
 	@ConfigProperty(name = "mqtt.username")
-	String mqttUsername;
+	Optional<String> mqttUsername;
 
 	@Inject
 	@ConfigProperty(name = "mqtt.password")
-	String mqttPassword;
+	Optional<String> mqttPassword;
 
 	private IMqttAsyncClient client;
 
@@ -52,8 +51,8 @@ public class MqttClient implements MqttCallbackExtended {
 					new MemoryPersistence()
 			);
 			MqttConnectOptions options = new MqttConnectOptions();
-			ofNullable(mqttUsername).ifPresent(options::setUserName);
-			ofNullable(mqttPassword).map(String::toCharArray).ifPresent(options::setPassword);
+			mqttUsername.ifPresent(options::setUserName);
+			mqttPassword.map(String::toCharArray).ifPresent(options::setPassword);
 			options.setWill(WILL_TOPIC, "0".getBytes(), 2, true);
 			client.setCallback(this);
 			client.connect(options).waitForCompletion();
