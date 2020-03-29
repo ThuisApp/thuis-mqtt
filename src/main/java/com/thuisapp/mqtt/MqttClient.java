@@ -53,6 +53,7 @@ public class MqttClient implements MqttCallbackExtended {
 			MqttConnectOptions options = new MqttConnectOptions();
 			mqttUsername.ifPresent(options::setUserName);
 			mqttPassword.map(String::toCharArray).ifPresent(options::setPassword);
+			options.setAutomaticReconnect(true);
 			options.setWill(WILL_TOPIC, "0".getBytes(), 2, true);
 			client.setCallback(this);
 			client.connect(options).waitForCompletion();
